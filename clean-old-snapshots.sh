@@ -29,7 +29,7 @@ won't be erased"
 
 function parse_params
 {
-    while getopts ":f:d:$EC2_PARAMS_OPTS" opt; do
+    while getopts ":nf:d:$EC2_PARAMS_OPTS" opt; do
         case $opt in
         f)
             create_or_append_to_var FILTERS "$OPTARG"
@@ -37,6 +37,8 @@ function parse_params
         d)
             KEEP_ONE_PER_DAY_DAYS=`echo $OPTARG | cut -d':' -f1 | grep -E ^[0-9]+$`
             DELETE_ALL_DAYS=`echo $OPTARG | cut -d':' -f2 | grep -E ^[0-9]+$`
+            echo "got these args" 
+            echo "KEEP_ONE_PER_DAY_DAYS $KEEP_ONE_PER_DAY_DAYS DELETE_ALL_DAYS $DELETE_ALL_DAYS"
             ;;
         n)
             DRY_RUN=true
