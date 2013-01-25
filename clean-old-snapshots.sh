@@ -22,6 +22,7 @@ USAGE_DESCRIPTION="Usage: `basename $0` [ -f <snapshot_filter> ] \
 Note that: 
   - F: Snapshot filters can be any accepted filters by command ec2-describe-snapshots
 (http://docs.amazonwebservices.com/AWSEC2/latest/CommandLineReference/ApiReference-cmd-DescribeSnapshots.html)
+   -n Dry run - do not run delete
   - d <x:y>: Backups older than y days will be deleted, backups older than x days but not
 older than x days will be erased except one per day, and backups not older than x days
 won't be erased"
@@ -36,6 +37,9 @@ function parse_params
         d)
             KEEP_ONE_PER_DAY_DAYS=`echo $OPTARG | cut -d':' -f1 | grep -E ^[0-9]+$`
             DELETE_ALL_DAYS=`echo $OPTARG | cut -d':' -f2 | grep -E ^[0-9]+$`
+            ;;
+        n)
+            DRY_RUN=true
             ;;
         \?)
             print_error "Unknown option -$OPTARG"
@@ -102,7 +106,11 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
     SNAP_ID=`echo $SNAP_DESC | cut -d' ' -f2`
     if [ "$SNAP_DATE" -lt "$DELETE_ALL_DATE" ] ; then
         print "$SNAP_ID - $SNAP_DATE - older than $DELETE_ALL_DATE - deleting..."
-        ec2-delete-snapshot $SNAP_ID
+        if [[ "$DRY_RUN" != "true" ]]; then
+            #ec2-delete-snapshot $SNAP_ID
+        else
+            echo "Dry run enabled.  Skipping execution"
+        fi
     elif [ "$SNAP_DATE" -gt "$KEEP_ONE_PER_DAY_DATE" ] ; then
         if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
             print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - last of its date - keeping..."
@@ -113,7 +121,11 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
         if [ ! -z "$PREVIOUS_SNAP_DATE" ] ; then
             if [ "$PREVIOUS_SNAP_DATE" == "$SNAP_DATE" ]; then
                 print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - not the last of its date - deleting..."
-                ec2-delete-snapshot $SNAP_ID
+                if [[ "$DRY_RUN" != "true" ]]; then
+                    #ec2-delete-snapshot $SNAP_ID
+                else
+                    echo "Dry run enabled.  Skipping execution"
+                fi
             else
                 print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - last of its date - keeping..."
             fi
