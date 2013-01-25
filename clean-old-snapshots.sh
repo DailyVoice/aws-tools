@@ -109,8 +109,7 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
     if [ "$SNAP_DATE" -lt "$DELETE_ALL_DATE" ] ; then
         print "$SNAP_ID - $SNAP_DATE - older than $DELETE_ALL_DATE - deleting..."
         if [[ "$DRY_RUN" != "true" ]]; then
-            #ec2-delete-snapshot $SNAP_ID
-            echo "would delete here"
+            ec2-delete-snapshot $SNAP_ID
         else
             echo "Dry run enabled.  Skipping execution"
         fi
@@ -125,8 +124,7 @@ for SNAP_DESC in `echo -e $SNAPS_DESC | awk '{ print $1" "$2 }' | sort -n` ; do
             if [ "$PREVIOUS_SNAP_DATE" == "$SNAP_DATE" ]; then
                 print "$PREVIOUS_SNAP_ID - $PREVIOUS_SNAP_DATE - not the last of its date - deleting..."
                 if [[ "$DRY_RUN" != "true" ]]; then
-                    #ec2-delete-snapshot $SNAP_ID
-                    echo "would delete here"
+                    ec2-delete-snapshot $SNAP_ID
                 else
                     echo "Dry run enabled.  Skipping execution"
                 fi
